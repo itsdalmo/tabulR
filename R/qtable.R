@@ -19,87 +19,54 @@
 #' @examples
 #' # TODO
 
-qtable <- function(df, vars, groups = NULL, margin = TRUE, wide = TRUE, weight = NULL) UseMethod("qtable")
+qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  UseMethod("qtable")
+}
 
 #' @export
-qtable.data.frame <- function(df, vars, groups = NULL, margin = TRUE, wide = TRUE, weight = NULL) {
+qtable.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   df <- data.table::as.data.table(df)
-  as.data.frame(qtable_impl(df, vars, groups, margin, wide, weight))
+  as.data.frame(qtable_impl(df, vars, groups, weight, margin, wide))
 }
 
 #' @export
-qtable.data.table <- function(df, vars, groups = NULL, margin = TRUE, wide = TRUE, weight = NULL) {
+qtable.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
   df <- data.table::copy(df)
-  qtable_impl(df, vars, groups, margin, wide, weight)
+  qtable_impl(df, vars, groups, weight, margin, wide)
 }
 
-qtable_impl <- function(df, vars, groups = NULL, margin = TRUE, wide = TRUE, weight = NULL) {
-  if (!length(vars)) {
-    stop("No variables specified.")
-  } else if (any(vars %in% groups)) {
-    stop("Cannot group by and aggregate the same variable.")
-  }
+qtable_impl <- function(df, vars, groups, weight, margin, wide) {
+  if (!length(vars)) stop("No variables specified.")
+  if (any(vars %in% groups)) stop("Cannot group by and aggregate the same variable.")
 
-  # Subset data and make sure variables are specified correctly ----------------
-  df <- df[, c(groups, vars), with = FALSE]
+  # Subset data and make sure variables are specified correctly
+  df <- df[, c(groups, vars, weight), with = FALSE][, "wt" := weight %||% 1L, with = FALSE]
   type <- unique(simple_classes(df[, vars, with = FALSE]))
 
-  if (length(vars) > 1L) {
-    if (length(type) != 1L) stop("qtable does not support mixed classes.")
-    if (type == "factor") {
-      # Factors must have identical levels when spreading.
-      levels <- lapply(df[, vars, with = FALSE], levels)
-      levels <- unlist(lapply(levels[-1L], identical, levels[[1L]]))
-      if (!all(levels) && wide) stop("All factors must have identical levels if wide is TRUE.")
-    } else if (type != "numeric") {
-      stop("qtable does not support multiple variables if all classes are not factor, or numeric.")
-    }
+  # Multiple types or multiple variables when type is not character
+  # or factor, are not supported. Mult. factors must have identical levels.
+  if (length(type) != 1L) {
+    stop("qtable does not support mixed classes.")
+  } else if (length(vars) > 1L && !type %in% c("numeric", "factor")) {
+    stop("qtable does not support multiple variables if all classes are not factor, or numeric.")
+  } else if (length(vars) > 1L && type == "factor" && wide) {
+    levels <- lapply(df[, vars, with = FALSE], levels)
+    levels <- unlist(lapply(levels[-1L], identical, levels[[1L]]))
+    if (!all(levels)) stop("Multiple factors must have identical levels to spread.")
   }
 
-  # rbind to add an average for the first group
-  # melt to long format and set groups as key.
+  # Use rbind to include a margin (2x size). Always set the none-margin weights
+  # to 1L. If no weight is specified, it is 1L already.
   if (!is.null(groups) && margin)
-    df <- rbind(data.table::copy(df), df[, groups[1] := "Total", with = FALSE])
-  df <- data.table::melt(df, groups, vars, value.factor = isTRUE(type == "factor"))
+    df <- rbind(data.table::copy(df)[, wt := 1L], df[, groups[1] := "Total", with = FALSE])
+  df <- data.table::melt(df, c(groups, "wt"), vars, value.factor = isTRUE(type == "factor"))
 
-  # Aggregate the data and spread if desired
-  # character/factor -----------------------------------------------------------
-  if (type == "character" || type == "factor") {
-    df <- df[, .(n = .N), by = c(groups, "variable", "value")]
-    df[, proportion := prop.table(n), by = c(groups, "variable")]
-    if (wide) {
-      df[, n := sum(n), by = c(groups, "variable")]
-      fm <- paste0(c(groups, if (length(unique(df$variable)) > 1L) "variable", "n"), collapse = "+")
-      fm <- paste0(fm, "~ value", collapse = " ")
-      df <- data.table::dcast(df, formula = fm, value.var = "proportion")
-    }
-
-    # numeric --------------------------------------------------------------------
+  if (type == "factor" || type == "character") {
+    df <- table_freq(df, vars, groups, wide)
   } else if (type == "numeric") {
-    df <- df[, .(n = .N, value = mean(value, na.rm = TRUE)), by = c(groups, "variable")]
-    if (wide) {
-      if (length(groups) > 1L && length(vars) == 1L) {
-        spread_by <- tail(groups, 1L)
-        group_by <- setdiff(groups, spread_by)
-        df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = group_by]
-        fm <- paste0(c(group_by, "n"), collapse = "+")
-        fm <- paste0(fm, "~", spread_by)
-      } else {
-        df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = groups]
-        fm <- paste0(c(groups, "n"), collapse = "+")
-        fm <- paste0(fm, "~ variable", collapse = " ")
-      }
-
-      df <- data.table::dcast(df, formula = fm, value.var = "value")
-    }
-
-    # date -----------------------------------------------------------------------
+    df <- table_mean(df, vars, groups, wide)
   } else if (type == "date") {
-    df <- df[, .(n = .N, min = min(value, na.rm = TRUE), max = max(value, na.rm = TRUE)), by = c(groups, "variable")]
-    if (!wide) {
-      df <- data.table::melt(df, groups, c("min", "max"), variable.name = "type")
-    }
-    # error ----------------------------------------------------------------------
+    df <- table_date(df, vars, groups, wide)
   } else {
     stop("qtable does not support variables of class ", paste0("'", type, "'"))
   }

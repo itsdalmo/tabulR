@@ -8,6 +8,7 @@ df <- data.frame(
   num = runif(20, 0, 100),
   fct = factor(rep(c("fA", "fB", "fC"), 10)[1:20L]),
   chr = c(rep(c("cA", "cB"), 5), rep("cC", 10)),
+  w = c(rep(1L, 10), rep(2L, 10)),
   stringsAsFactors = FALSE
 )
 

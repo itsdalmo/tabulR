@@ -1,0 +1,23 @@
+Package: tabulR
+Type: Package
+Title: Quickly Generate Margin Tables.
+Version: 0.1
+Date: 2016-03-06
+Authors@R: person("Kristian D.", "Olsen", , "kristian@doingit.no", c("aut", "cre"))
+Description: A small and packaged function for generating margin tables.
+License: MIT + file LICENSE
+LazyData: TRUE
+Depends:
+    R (>= 3.2)
+Imports:
+    data.table,
+    stringi,
+    tools,
+    utils
+Suggests:
+    dplyr,
+    knitr,
+    testthat,
+    tidyr
+RoxygenNote: 5.0.1
+VignetteBuilder: knitr

@@ -14,5 +14,7 @@ Imports:
 Suggests:
     knitr,
     testthat
+Remotes:
+    Rdatatable/data.table
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr

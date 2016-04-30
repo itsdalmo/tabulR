@@ -13,7 +13,8 @@ Imports:
     data.table (>= 1.9.7)
 Suggests:
     knitr,
-    testthat
+    testthat,
+    rmarkdown
 Remotes:
     Rdatatable/data.table
 RoxygenNote: 5.0.1

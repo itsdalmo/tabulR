@@ -1,42 +1,60 @@
 context("numeric columns")
 
-set.seed(100L)
+set.seed(1000L)
 df <- data.frame(
-  grp = factor(c(rep(c("gA", "gB"), 5), rep("gC", 10))),
-  grp2 = rep(c("g2a", "g2b"), 10),
-  int = runif(20, 1, 10),
-  num = runif(20, 0, 100),
-  fct = factor(rep(c("fA", "fB", "fC"), 10)[1:20L]),
-  chr = c(rep(c("cA", "cB"), 5), rep("cC", 10)),
-  w = c(rep(1L, 10), rep(2L, 10)),
+  group = factor(paste("Group", LETTERS[1:3]), levels = paste("Group", LETTERS[1:4])),
+  fct = factor(c("No", "Yes", NA), levels = c("Yes", "No", "Don't know")),
+  int = as.integer(runif(3, 1, 10)),
+  num = runif(3, 0, 100),
+  weight = c(1, 2, 2),
   stringsAsFactors = FALSE
 )
 
-# TODO
-test_that("single numeric", {
-  x <- qtable(df, vars = "int")
-  expect_equal(dim(x), c(1, 2))
-  expect_equal(names(x), c("n", "int"))
+test_that("Error for mixed columns", {
+  expect_error(x <- qtable(df, vars = c("int", "fct")), "mixed classes")
 })
 
-test_that("single numeric with groups", {
-  x <- qtable(df, vars = "int", groups = "grp")
-  expect_equal(dim(x), c(4, 3))
-  expect_equal(names(x), c("grp", "n", "int"))
-
-  x <- qtable(df, vars = "int", groups = c("grp", "grp2"))
-  expect_equal(dim(x), c(4, 4)) # Will fail when complete_df is done.
-  expect_equal(names(x), c("grp", "n", "g2a", "g2b"))
+test_that("mean for a single numeric", {
+  x <- qtable(df, vars = "num")
+  expect_identical(x$n, 3L)
+  expect_identical(round(x$num, digits = 3), 42.497)
 })
 
-test_that("multiple numerics", {
-  x <- qtable(df, vars = c("int", "num"))
-  expect_equal(dim(x), c(1,3))
-  expect_equal(names(x), c("n", "int", "num"))
+test_that("means for multiple numerics", {
+  x <- qtable(df, vars = c("num", "int"))
+  expect_identical(x$n, 3L)
+  expect_identical(round(x$num, digits = 3), 42.497)
+  expect_identical(x$int, 4)
 })
 
-test_that("multiple numerics with groups", {
-  x <- qtable(df, vars = c("int", "num"), groups = "grp")
-  expect_equal(dim(x), c(4,4))
-  expect_equal(names(x), c("grp", "n", "int", "num"))
+test_that("means for numeric by group", {
+  x <- qtable(df, vars = "num", groups = "group")
+  expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:3]), "Total"))
+  expect_identical(x$n, c(1L, 1L, 1L, 3L))
+  expect_identical(round(x$num, 1), c(69.1, 51.6, 6.8, 42.5))
+})
+
+test_that("means for multiple numerics by group", {
+  x <- qtable(df, vars = c("int", "num"), groups = "group")
+  expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:3]), "Total"))
+  expect_identical(x$n, c(1L, 1L, 1L, 3L))
+  expect_identical(x$int, c(3, 7, 2, 4))
+  expect_identical(round(x$num, 1), c(69.1, 51.6, 6.8, 42.5))
+})
+
+test_that("means for single numeric by multiple groups", {
+  x <- qtable(df, vars = "num", groups = c("group", "fct"))
+  expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:2]), "Total"))
+  expect_identical(x$n, c("1", "1", "1/1"))
+  expect_identical(round(x$Yes, 1), c(NA, 51.6, 51.6))
+  expect_identical(round(x$No, 1), c(69.1, NA, 69.1))
+  expect_identical(x$`Don't know`, as.numeric(c(NA, NA, NA)))
+})
+
+test_that("means for weighted numerics", {
+  x <- qtable(df, vars = c("int", "num"), groups = "group", weight = "weight")
+  expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:3]), "Total"))
+  expect_identical(x$n, c(1L, 1L, 1L, 3L))
+  expect_identical(x$int, c(3, 7, 2, 4.2))
+  expect_identical(round(x$num, 1), c(69.1, 51.6, 6.8, 37.2))
 })

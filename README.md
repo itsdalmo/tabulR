@@ -38,4 +38,4 @@ CRAN:
 Usage
 -----
 
-TODO
+TODO...

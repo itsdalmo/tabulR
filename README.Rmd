@@ -50,4 +50,4 @@ CRAN:
 
 ## Usage
 
-TODO
+TODO...

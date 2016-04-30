@@ -1,40 +1,4 @@
-#' qtable
-#'
-#' A function for generating "quick" tables for one or more variables (does not support mixed types).
-#' By default it generates proportions for \code{factor} and \code{character} vectors,
-#' means for \code{numeric} and \code{integer}, and min/max for \code{Date} (including POSIX)
-#' vectors. It always includes the number of observations for each variable.
-#' When producing wide tables, uneven counts are separate with \code{/}.
-#'
-#' @param df A \code{data.frame}, \code{data.table} or \code{Survey}.
-#' @param vars The variables to aggregate.
-#' @param groups Variables to group by.
-#' @param margin Set to TRUE to generate a margin for the first variable in groups.
-#' @param wide Should a long or a wide table be returned? Wide tables spread levels for
-#' \code{factor} and unique values for \code{character}. For a single \code{numeric},
-#' the last group is used, while multiple \code{numeric} will be spread by variable names.
-#' @param weight A variable to weight results by.
-#' @author Kristian D. Olsen
-#' @export
-#' @examples
-#' # TODO
-
-qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  UseMethod("qtable")
-}
-
-#' @export
-qtable.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  df <- data.table::as.data.table(df)
-  as.data.frame(qtable_impl(df, vars, groups, weight, margin, wide))
-}
-
-#' @export
-qtable.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  df <- data.table::copy(df)
-  qtable_impl(df, vars, groups, weight, margin, wide)
-}
-
+# qtable -----------------------------------------------------------------------
 qtable_impl <- function(df, vars, groups, weight, margin, wide) {
   if (!length(vars)) stop("No variables specified.")
   if (any(vars %in% groups)) stop("Cannot group by and aggregate the same variable.")
@@ -53,27 +17,90 @@ qtable_impl <- function(df, vars, groups, weight, margin, wide) {
     levels <- lapply(df[, vars, with = FALSE], levels)
     levels <- unlist(lapply(levels[-1L], identical, levels[[1L]]))
     if (!all(levels)) stop("Multiple factors must have identical levels to spread.")
+  } else if (length(vars) > 1L && type == "numeric") {
+    # Make sure integers are converted to numeric before melting to stop warnings.
+    is_integer <- vapply(df[, vars, with = FALSE], is.integer, logical(1L))
+    if (any(is_integer) && !all(is_integer))
+      df[, `:=`(vars[is_integer], lapply(.SD, as.numeric)), .SDcols = vars[is_integer]]
   }
 
   # Use rbind to include a margin (2x size). Always set the none-margin weights
   # to 1L. If no weight is specified, it is 1L already.
-  if (!is.null(groups) && margin)
+  if (length(groups) && margin)
     df <- rbind(data.table::copy(df)[, wt := 1L], df[, groups[1] := "Total", with = FALSE])
-  df <- data.table::melt(df, c(groups, "wt"), vars, value.factor = isTRUE(type == "factor"))
+
+  df <- data.table::melt(
+    df, c(groups, "wt"), vars, variable.factor = TRUE, value.factor = identical(type, "factor"))
+
+  # Filter NA values in groups and/or response.
+  is_na <- vapply(df[, groups, with = FALSE], is.na, logical(nrow(df)))
+  is_na <- rowSums(data.frame(is_na)) > 0L
+  df <- df[!is.na(value) & !is_na]
 
   if (type == "factor" || type == "character") {
-    df <- table_freq(df, vars, groups, wide)
+    df <- qtable_freq(df, vars, groups, wide)
   } else if (type == "numeric") {
-    df <- table_mean(df, vars, groups, wide)
+    df <- qtable_mean(df, vars, groups, wide)
   } else if (type == "date") {
-    df <- table_date(df, vars, groups, wide)
+    df <- qtable_date(df, vars, groups, wide)
   } else {
     stop("qtable does not support variables of class ", paste0("'", type, "'"))
   }
 
-  df[]
+  structure(df[], class = c("qtable", class(df)))
 
 }
 
-#' @export
-.datatable.aware <- TRUE
+# Underlying aggregate functions for each variable type ------------------------
+# Numeric/integer
+qtable_mean <- function(df, vars, groups, wide) {
+  df <- df[, .(n = .N, value = weighted.mean(value, w = wt, na.rm = TRUE)), by = c(groups, "variable")]
+  if (wide) {
+    if (length(groups) > 1L && length(vars) == 1L) {
+      # Paste together counts for each "grouping" when spreading a numeric
+      # by multiple groups. TODO: Include 0's for empty groups as well.
+      grp <- head(groups, -1L)
+      df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = grp]
+      fm <- paste0(c(head(groups, -1L), "n"), collapse = "+")
+      fm <- paste0(fm, "~", tail(groups, 1L))
+    } else {
+      fm <- paste0(c(groups, "n"), collapse = "+")
+      fm <- paste0(fm, "~ variable", collapse = " ")
+    }
+
+    df <- data.table::dcast(df, formula = fm, value.var = "value", drop = c(TRUE, FALSE))
+  }
+  df
+}
+
+# Factor/character
+qtable_freq <- function(df, vars, groups, wide) {
+  # Sum "wt" to get a weighted count by variable and value.
+  # Use this sum to generate proportions. For "n" we use natural weights.
+  df <- df[, .(n = .N, wt = sum(wt)), by = c(groups, "variable", "value")]
+  df[, proportion := prop.table(wt), by = c(groups, "variable")][, wt := NULL]
+
+  # Return early if not casting
+  if (!wide) return(df)
+
+  # Use total n for groups when casting values
+  df[, n := sum(n), by = c(groups, "variable")]
+  fm <- paste0(c(groups, if (length(unique(df$variable)) > 1L) "variable", "n"), collapse = "+")
+  fm <- paste0(fm, "~ value", collapse = " ")
+
+  # Don't drop levels in LHS (req v1.9.7) when casting. Fill with 0's.
+  df <- data.table::dcast(df, formula = fm, value.var = "proportion", drop = c(TRUE, FALSE), fill = 0L)
+  df
+}
+
+# Date
+qtable_date <- function(df, vars, groups, wide) {
+  df <- df[, .(n = .N, min = min(value, na.rm = TRUE), max = max(value, na.rm = TRUE)), by = c(groups, "variable")]
+  if (!wide) {
+    df <- data.table::melt(df, groups, c("min", "max"), variable.name = "type")
+  } else if (length(vars) == 1L) {
+    df[, variable := NULL]
+  }
+  df
+}
+

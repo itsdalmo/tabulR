@@ -37,7 +37,7 @@ test_that("means for numeric by group", {
 test_that("means for multiple numerics by group", {
   x <- qtable(df, vars = c("int", "num"), groups = "group")
   expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:3]), "Total"))
-  expect_identical(x$n, c(1L, 1L, 1L, 3L))
+  expect_identical(x$n, c("1/1", "1/1", "1/1", "3/3"))
   expect_identical(x$int, c(3, 7, 2, 4))
   expect_identical(round(x$num, 1), c(69.1, 51.6, 6.8, 42.5))
 })
@@ -54,7 +54,7 @@ test_that("means for single numeric by multiple groups", {
 test_that("means for weighted numerics", {
   x <- qtable(df, vars = c("int", "num"), groups = "group", weight = "weight")
   expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:3]), "Total"))
-  expect_identical(x$n, c(1L, 1L, 1L, 3L))
+  expect_identical(x$n, c("1/1", "1/1", "1/1", "3/3"))
   expect_identical(x$int, c(3, 7, 2, 4.2))
   expect_identical(round(x$num, 1), c(69.1, 51.6, 6.8, 37.2))
 })

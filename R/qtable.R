@@ -56,13 +56,13 @@ qtable_impl <- function(df, vars, groups, weight, margin, wide) {
 qtable_mean <- function(df, vars, groups, wide) {
   df <- df[, .(n = .N, value = weighted.mean(value, w = wt, na.rm = TRUE)), by = c(groups, "variable")]
   if (wide) {
-    if (length(groups) > 1L && length(vars) == 1L) {
+    if (length(groups) > 1L || length(groups) && length(vars) > 1L) {
       # Paste together counts for each "grouping" when spreading a numeric
       # by multiple groups. TODO: Include 0's for empty groups as well.
-      grp <- head(groups, -1L)
+      grp <- if (length(groups) > 1L) head(groups, -1L) else groups
       df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = grp]
-      fm <- paste0(c(head(groups, -1L), "n"), collapse = "+")
-      fm <- paste0(fm, "~", tail(groups, 1L))
+      fm <- paste0(c(grp, "n"), collapse = "+")
+      fm <- paste0(fm, "~", if (length(groups) > 1L) tail(groups, 1L) else "variable")
     } else {
       fm <- paste0(c(groups, "n"), collapse = "+")
       fm <- paste0(fm, "~ variable", collapse = " ")

@@ -1,3 +1,39 @@
+#' dtable
+#'
+#' Same as \code{\link{qtable}}, except designed for use with \code{dplyr}. It
+#' takes unquoted variable names, and aggregates any varible not selected as "groups"
+#' and or "weight". \code{\link{dtable}} will also look for groups using \code{dplyr}, if
+#' none are specified in the arguments.
+#'
+#' @inheritParams qtable
+#' @param ... Unquoted variable names passed to \code{\link[dplyr]{select}}.
+#' @return Same as \code{\link{qtable}}.
+#' @author Kristian D. Olsen
+#' @export
+#' @examples
+#' # TODO
+
+dtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+  if (!requireNamespace("dplyr", quietly = TRUE))
+    stop("dplyr is required to use 'dtable'.")
+
+  # Capture dots and get groups if none are specified
+  dots <- lazyeval::lazy_dots(...)
+  groups <- substitute(groups) %||% as.character(dplyr::groups(df))
+  weight <- substitute(weight)
+
+  dots <- c(groups, dots, weight)
+  df <- dplyr::select_(df, .dots = dots)
+
+  # Aggregat all columns not in groups/weights
+  if (!is.null(groups) && is.name(groups)) groups <- deparse(groups)
+  if (!is.null(weight) && is.name(groups)) weight <- deparse(weight)
+
+  vars <- setdiff(names(df), c(groups, weight))
+  qtable(df, vars, groups = groups, weight = weight, margin = margin, wide = wide)
+
+}
+
 #' qtable
 #'
 #' Generating "quick" tables for one or more variables (does not support mixed types).

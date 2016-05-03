@@ -5,7 +5,7 @@ tabulR
 
 [![Linux/OSX](https://travis-ci.org/itsdalmo/tabulR.svg?branch=master)](https://travis-ci.org/itsdalmo/tabulR) [![Windows](https://ci.appveyor.com/api/projects/status/github/itsdalmo/tabulR?branch=master&svg=true)](https://ci.appveyor.com/project/itsdalmo/tabulR) [![Coverage](http://codecov.io/github/itsdalmo/tabulR/coverage.svg?branch=master)](http://codecov.io/github/itsdalmo/tabulR?branch=master)
 
-tabulR includes just one function `qtable()`, which is meant to generate a "quick" table using [data.table](https://github.com/Rdatatable/data.table), and aims to balance information and readability in the output.
+tabulR includes just two functions `qtable()` and `dtable()`, which are meant to generate a "quick" table using [data.table](https://github.com/Rdatatable/data.table), and aims to balance information and readability in the output. `dtable` is meant to be used with dplyr (but uses the same code as qtable).
 
 Note: This is a work in progress.
 
@@ -290,6 +290,88 @@ Total
 </td>
 <td style="text-align:center;">
 0.0%
+</td>
+</tr>
+</tbody>
+</table>
+#### dtable
+
+This is not really a NSE version of `qtable`. It also uses dplyr's `select_` to subset the data, so that we can use e.g. `one_of()` - hence it was given a separate name.
+
+``` r
+require(dplyr)
+out <- df %>% group_by(group) %>% dtable(one_of("num"))
+knitr::knit_print(out, digits = 1L)
+```
+
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+group
+</th>
+<th style="text-align:center;">
+n
+</th>
+<th style="text-align:center;">
+num
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Group A
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+30.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Group B
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+25.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Group C
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+55.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Group D
+</td>
+<td style="text-align:center;">
+0
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Total
+</td>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+37.3
 </td>
 </tr>
 </tbody>

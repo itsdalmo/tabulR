@@ -18,9 +18,10 @@ knitr::opts_chunk$set(
 [![Windows](https://ci.appveyor.com/api/projects/status/github/itsdalmo/tabulR?branch=master&svg=true)](https://ci.appveyor.com/project/itsdalmo/tabulR)
 [![Coverage](http://codecov.io/github/itsdalmo/tabulR/coverage.svg?branch=master)](http://codecov.io/github/itsdalmo/tabulR?branch=master)
 
-tabulR includes just one function `qtable()`, which is meant to generate a "quick"
-table using [data.table](https://github.com/Rdatatable/data.table), and aims to
-balance information and readability in the output.
+tabulR includes just two functions `qtable()` and `dtable()`, which are meant to 
+generate a "quick" table using [data.table](https://github.com/Rdatatable/data.table), 
+and aims to balance information and readability in the output. `dtable` is meant to be
+used with dplyr (but uses the same code as qtable).
 
 Note: This is a work in progress.
 
@@ -91,3 +92,13 @@ out <- qtable(df, vars = "fct", groups = "group")
 knitr::knit_print(out, digits = 1L)
 ```
 
+#### dtable
+
+This is not really a NSE version of `qtable`. It also uses dplyr's `select_` to
+subset the data, so that we can use e.g. `one_of()` - hence it was given a separate name.
+
+```{r, message = FALSE}
+require(dplyr)
+out <- df %>% group_by(group) %>% dtable(one_of("num"))
+knitr::knit_print(out, digits = 1L)
+```

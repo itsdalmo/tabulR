@@ -13,6 +13,8 @@ Imports:
     data.table (>= 1.9.7),
     knitr
 Suggests:
+    dplyr,
+    lazyeval,
     testthat,
     rmarkdown
 Remotes:

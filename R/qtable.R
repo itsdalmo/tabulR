@@ -77,6 +77,7 @@ generate_qtable <- function(df, vars, groups, weight, margin, wide) {
   # Melt to get long format before aggregation.
   if (length(groups) && margin) {
     mg <- data.table::copy(df)[, wt := 1L]
+    mg[, groups[1] := lapply(.SD, as.factor), .SDcols = groups[1], with = FALSE]
     df <- rbind(mg, df[, groups[1] := "Total", with = FALSE])
   }
 

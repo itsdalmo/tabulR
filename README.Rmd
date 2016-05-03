@@ -67,7 +67,7 @@ group in `groups`).
 - It also includes a margin (named *Total*) for each column by default.
 
 ```{r, message = FALSE}
-devtools::load_all()
+require(tabulR)
 set.seed(100L)
 df <- data.frame(
   group = factor(paste("Group", LETTERS[1:3]), levels = paste("Group", LETTERS[1:4])),

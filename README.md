@@ -38,8 +38,6 @@ CRAN:
 Usage
 -----
 
-#### More
-
 `qtable` takes one or more variables and returns the following, dep. on type:
 
 -   `numeric`: The count and weighted mean.
@@ -56,7 +54,7 @@ Usage
 -   It also includes a margin (named *Total*) for each column by default.
 
 ``` r
-devtools::load_all()
+require(tabulR)
 set.seed(100L)
 df <- data.frame(
   group = factor(paste("Group", LETTERS[1:3]), levels = paste("Group", LETTERS[1:4])),

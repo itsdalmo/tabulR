@@ -48,7 +48,11 @@ generate_qtable <- function(df, vars, groups, weight, margin, wide) {
 
   # Subset and add weight (if specified, 1L if not.)
   df <- df[, c(groups, vars, weight), with = FALSE]
-  df[, "wt" := weight %||% 1L, with = FALSE]
+  if (!is.null(weight) && weight %in% names(df)) {
+    data.table::setnames(df, weight, "wt")
+  } else {
+    df[, wt := 1L]
+  }
 
   # Coerce integers to numeric. We are doing means anyhow.
   is_int <- vapply(df[, vars, with = FALSE], function(x) is.numeric(x) && is.integer(x), logical(1))

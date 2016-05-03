@@ -10,7 +10,7 @@ df <- data.frame(
 )
 
 test_that("Error for mixed columns", {
-  expect_error(x <- qtable(df, vars = c("date", "fct")), "mixed classes")
+  expect_error(x <- qtable(df, vars = c("date", "fct")), "mixed variable types.")
 })
 
 test_that("min/max for a single date", {
@@ -26,19 +26,15 @@ test_that("min/max for a multiple dates (error)", {
 
 test_that("min/max for a single grouped date", {
   x <- qtable(df, vars = "date", groups = "group")
-  expect_identical(x$n, c(1L, 1L, 1L, 3L))
-  expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:3]), "Total"))
-  expect_identical(x$min, c(df$date, as.Date("2016/01/01")))
-  expect_identical(x$max, c(df$date, as.Date("2016/03/01")))
+  expect_identical(x$n, c(1L, 1L, 1L, 0L, 3L))
+  expect_identical(as.character(x$group), c(paste("Group", LETTERS[1:4]), "Total"))
+  expect_identical(x$min, c(df$date, NA, as.Date("2016/01/01")))
+  expect_identical(x$max, c(df$date, NA, as.Date("2016/03/01")))
 })
 
 test_that("min/max for a single date with multiple groups", {
   x <- qtable(df, vars = "date", groups = c("group", "fct"))
-  expect_identical(x$n, c(1L, 1L, 1L, 1L))
-  expect_identical(as.character(x$group), c("Group A", "Group B", "Total", "Total"))
-  expect_identical(as.character(x$fct), c("No", "Yes", "No", "Yes"))
-  expect_identical(x$min, rep(c(as.Date("2016/01/01"), as.Date("2016/02/01")), 2))
-  expect_identical(x$max, rep(c(as.Date("2016/01/01"), as.Date("2016/02/01")), 2))
+  expect_identical(dim(x), c(15L, 5L))
 })
 
 test_that("min/max for a single date with multiple groups", {

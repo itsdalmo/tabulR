@@ -13,40 +13,18 @@ NULL
 #' @export
 .datatable.aware <- TRUE
 
-#' qtable
-#'
-#' Generating "quick" tables for one or more variables (does not support mixed types).
-#' By default \code{qtable} generates proportions for \code{factor} and \code{character} vectors,
-#' means for \code{numeric} and \code{integer}, and min/max for \code{Date} (including POSIX)
-#' vectors. It always includes the number of observations for each variable.
-#' When producing wide tables, group counts are separate with \code{/}.
-#'
-#' @param df A \code{data.frame} or \code{data.table}.
-#' @param vars The variables to aggregate.
-#' @param groups Variables to group by.
-#' @param weight A variable to weight results by. This is only applied to the margin.
-#' @param margin Set to TRUE to generate a margin for the first group.
-#' @param wide Should a long or a wide table be returned? Wide tables spread levels for
-#' \code{factor} and unique values for \code{character}. For a single \code{numeric},
-#' the last group is used, while multiple \code{numeric} will be spread by variable names.
-#' @return A \code{data.frame} or \code{data.table} with the additional class \code{qtable}.
-#' @author Kristian D. Olsen
+#' @importFrom knitr knit_print
 #' @export
-#' @examples
-#' # TODO
+knit_print.qtable <- function(x, format = "html", align = NULL, digits = 1L, ...) {
+  # Default alignment
+  def <- rep("l", ncol(x)); def[vapply(x, is.numeric, logical(1L))] <- "c"
 
-qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  UseMethod("qtable")
-}
+  # Format numerics between 0 and 1 as percentages.
+  is_pct <- vapply(x, is_percent, logical(1))
+  if (any(is_pct)) {
+    fmt <-  paste0("%.", digits, "f%%")
+    x[is_pct] <- lapply(x[is_pct], function(p) sprintf(fmt = fmt, p*100L))
+  }
 
-#' @export
-qtable.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  df <- data.table::as.data.table(df)
-  as.data.frame(qtable_impl(df, vars, groups, weight, margin, wide))
-}
-
-#' @export
-qtable.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
-  df <- data.table::copy(df)
-  qtable_impl(df, vars, groups, weight, margin, wide)
+  knitr::kable(x, format, align = align %||% def, digits, ...)
 }

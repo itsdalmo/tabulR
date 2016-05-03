@@ -50,8 +50,6 @@ CRAN:
 
 ## Usage
 
-#### More
-
 `qtable` takes one or more variables and returns the following, dep. on type:
 
 - `numeric`: The count and weighted mean.

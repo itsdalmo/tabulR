@@ -10,14 +10,12 @@ LazyData: TRUE
 Depends:
     R (>= 3.2)
 Imports:
-    data.table (>= 1.9.7),
+    data.table (>= 1.9.6),
     knitr
 Suggests:
     dplyr,
     lazyeval,
     testthat,
     rmarkdown
-Remotes:
-    Rdatatable/data.table
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr

@@ -4,33 +4,23 @@
 \alias{qtable}
 \title{qtable}
 \usage{
-qtable(df, vars, groups = NULL, weight = NULL, margin = TRUE,
+qtable(df, ..., groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 }
 \arguments{
-\item{df}{A \code{data.frame} or \code{data.table}.}
-
-\item{vars}{The variables to aggregate, as a character vector.}
-
-\item{groups}{Variables to group by during aggregation.}
-
-\item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
-
-\item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
-
-\item{wide}{Should a long or a wide table be returned? Wide tables spread levels for
-\code{factor} and unique values for \code{character}. For a single \code{numeric},
-the last group is used, while multiple \code{numeric} will be spread by variable names.}
+\item{...}{Unquoted variable names passed to \code{\link[dplyr]{select}}.}
 }
 \value{
-A \code{data.frame} or \code{data.table} with the additional class \code{qtable}.
+Same as \code{\link{qtable}}.
 }
 \description{
-Generating "quick" tables for one or more variables (does not support mixed types).
-By default \code{qtable} generates proportions for \code{factor} and \code{character} vectors,
-means for \code{numeric} and \code{integer}, and min/max for \code{Date} (including POSIX)
-vectors. It always includes the number of observations for each variable.
-When producing wide tables, group counts are separate with \code{/}.
+Same as \code{\link{qtable_}}, except designed for use with \code{dplyr}. It takes
+unquoted variable names and supports all dplyr select statements, except renaming in
+the select statement itself. \code{qtable} also looks for \code{dplyr} groups if
+they are not specified.
+}
+\details{
+Note that \code{groups} and \code{weight} still have to be character vectors.
 }
 \examples{
 # TODO

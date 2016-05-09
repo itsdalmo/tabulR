@@ -6,8 +6,8 @@
 \alias{tabulR-package}
 \title{tabulR/qtable: Create "quick" tables.}
 \description{
-This is a tiny packaged function (named \code{qtable}) that uses
-\code{\link[data.table]{data.table}} to generate a quick margin table for one
+This is a tiny package with two functions (named \code{qtable} and \code{qtable_})
+that uses \code{\link[data.table]{data.table}} to generate a quick margin table for one
 or more variables, by one or more groups. See \code{\link{qtable}} for more details.
 }
 \author{

@@ -11,7 +11,15 @@ df <- data.frame(
 
 test_that("qtable and dtable gives same output", {
   skip_if_not_installed("dplyr")
-  dt <- df %>% dplyr::group_by(group) %>% dtable(one_of("num"))
-  qt <- qtable(df, vars = "num", groups = "group")
+  dt <- df %>% dplyr::group_by(group) %>% qtable(one_of("num"))
+  qt <- qtable_(df, vars = "num", groups = "group")
+  expect_identical(dt, qt)
+})
+
+test_that("qtable supports renaming variables in call", {
+  skip_if_not_installed("dplyr")
+  dt <- df %>% dplyr::group_by(group) %>% qtable(score = num)
+  qt <- df %>% dplyr::group_by(group) %>% qtable(num)
+  names(qt)[3] <- "score"
   expect_identical(dt, qt)
 })

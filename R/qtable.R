@@ -7,7 +7,7 @@
 #'
 #' Note that \code{groups} and \code{weight} still have to be character vectors.
 #'
-#' @inheritParams qtable
+#' @inheritParams qtable_
 #' @param ... Unquoted variable names passed to \code{\link[dplyr]{select}}.
 #' @return Same as \code{\link{qtable}}.
 #' @author Kristian D. Olsen

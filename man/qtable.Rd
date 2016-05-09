@@ -8,7 +8,19 @@ qtable(df, ..., groups = NULL, weight = NULL, margin = TRUE,
   wide = TRUE)
 }
 \arguments{
+\item{df}{A \code{data.frame} or \code{data.table}.}
+
 \item{...}{Unquoted variable names passed to \code{\link[dplyr]{select}}.}
+
+\item{groups}{Variables to group by during aggregation.}
+
+\item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
+
+\item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
+
+\item{wide}{Should a long or a wide table be returned? Wide tables spread levels for
+\code{factor} and unique values for \code{character}. For a single \code{numeric},
+the last group is used, while multiple \code{numeric} will be spread by variable names.}
 }
 \value{
 Same as \code{\link{qtable}}.

@@ -283,9 +283,9 @@ Total
 </tr>
 </tbody>
 </table>
-#### dtable
+#### qtable
 
-This is not really a NSE version of `qtable`. It also uses dplyr's `select_vars` to subset the data, so that we can use e.g. `one_of()`.
+Sort of a NSE version of `qtable`. It requires dplyr's, and expects unquoted arguments for `var`, while allows us to use `one_of()`, `starts_with()` etc:
 
 ``` r
 require(dplyr)

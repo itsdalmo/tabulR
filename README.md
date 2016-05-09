@@ -5,23 +5,12 @@ tabulR
 
 [![Linux/OSX](https://travis-ci.org/itsdalmo/tabulR.svg?branch=master)](https://travis-ci.org/itsdalmo/tabulR) [![Windows](https://ci.appveyor.com/api/projects/status/github/itsdalmo/tabulR?branch=master&svg=true)](https://ci.appveyor.com/project/itsdalmo/tabulR) [![Coverage](http://codecov.io/github/itsdalmo/tabulR/coverage.svg?branch=master)](http://codecov.io/github/itsdalmo/tabulR?branch=master)
 
-tabulR includes just two functions `qtable()` and `dtable()`, which are meant to generate a "quick" table using [data.table](https://github.com/Rdatatable/data.table), and aims to balance information and readability in the output. `dtable` is meant to be used with dplyr (but uses the same code as qtable).
+tabulR includes just two functions `qtable()` and `qtable_()`, which are meant to generate a "quick" table using [data.table](https://github.com/Rdatatable/data.table), and aims to balance information and readability in the output. `qtable()` is meant to be used with dplyr and it's NSE select statements (but uses the same underlying code as `qtable_()`).
 
 Note: This is a work in progress.
 
 Installation
 ------------
-
-#### Dependencies ahead of CRAN
-
--   [data.table](https://github.com/Rdatatable/data.table) 1.9.7: Lets us use `drop = FALSE` for only RHS of formula in `dcast`.
-
-``` r
-# Install development version of data.table
-install.packages("data.table", type = "source", repos = "https://Rdatatable.github.io/data.table")
-```
-
-#### Install tabulR
 
 Development version:
 
@@ -67,7 +56,7 @@ df <- data.frame(
 #### Numeric
 
 ``` r
-out <- qtable(df, vars = "num", groups = c("group", "fct"))
+out <- qtable_(df, vars = "num", groups = c("group", "fct"))
 knitr::knit_print(out, digits = 1L)
 ```
 
@@ -182,7 +171,7 @@ NA
 #### Factor
 
 ``` r
-out <- qtable(df, vars = "fct", groups = "group")
+out <- qtable_(df, vars = "fct", groups = "group")
 knitr::knit_print(out, digits = 1L)
 ```
 
@@ -296,11 +285,11 @@ Total
 </table>
 #### dtable
 
-This is not really a NSE version of `qtable`. It also uses dplyr's `select_` to subset the data, so that we can use e.g. `one_of()` - hence it was given a separate name.
+This is not really a NSE version of `qtable`. It also uses dplyr's `select_vars` to subset the data, so that we can use e.g. `one_of()`.
 
 ``` r
 require(dplyr)
-out <- df %>% group_by(group) %>% dtable(one_of("num"))
+out <- df %>% group_by(group) %>% qtable(one_of("num"))
 knitr::knit_print(out, digits = 1L)
 ```
 

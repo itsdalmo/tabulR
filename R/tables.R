@@ -1,4 +1,4 @@
-qtable_impl <- function(df, vars, groups, weight, margin, wide) {
+qtable_impl <- function(df, vars, groups, weight, margin, margin_name, wide) {
   if (!length(vars)) {
     stop("No variables specified.")
   } else if (any(vars %in% groups)) {
@@ -41,7 +41,7 @@ qtable_impl <- function(df, vars, groups, weight, margin, wide) {
   if (length(groups) && margin) {
     mg <- data.table::copy(df)[, wt := 1L]
     mg[, groups[1] := lapply(.SD, as.factor), .SDcols = groups[1], with = FALSE]
-    df <- rbind(mg, df[, groups[1] := "Total", with = FALSE])
+    df <- rbind(mg, df[, groups[1] := margin_name %||% "Total", with = FALSE])
   }
 
   df <- data.table::melt(

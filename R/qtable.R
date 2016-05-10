@@ -49,6 +49,7 @@ qtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wide = 
 #' @param groups Variables to group by during aggregation.
 #' @param weight Name of a variable to weight by. Only used when \code{margin = TRUE}.
 #' @param margin If \code{TRUE} (the default), the first group will include a "Total".
+#' @param margin_name Optional: Give the margin a different name from "Total".
 #' @param wide Should a long or a wide table be returned? Wide tables spread levels for
 #' \code{factor} and unique values for \code{character}. For a single \code{numeric},
 #' the last group is used, while multiple \code{numeric} will be spread by variable names.
@@ -58,21 +59,21 @@ qtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wide = 
 #' @examples
 #' # TODO
 
-qtable_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+qtable_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
   UseMethod("qtable_")
 }
 
 #' @export
-qtable_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+qtable_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
   df <- data.table::as.data.table(df)
-  df <- as.data.frame(qtable_impl(df, vars, groups, weight, margin, wide))
+  df <- as.data.frame(qtable_impl(df, vars, groups, weight, margin, margin_name, wide))
   structure(df, class = c("qtable", class(df)))
 }
 
 #' @export
-qtable_.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+qtable_.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
   df <- data.table::copy(df)
-  df <- qtable_impl(df, vars, groups, weight, margin, wide)
+  df <- qtable_impl(df, vars, groups, weight, margin, margin_name, wide)
   structure(df, class = c("qtable", class(df)))
 }
 

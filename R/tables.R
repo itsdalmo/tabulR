@@ -79,9 +79,13 @@ qtable_mean <- function(df, vars, groups, wide) {
   # by multiple groups. TODO: Include 0's for empty groups as well.
   if (length(groups) > 1L || length(groups) && length(vars) > 1L) {
     # Paste together counts for each "grouping" when spreading a numeric
-    # by multiple groups. TODO: Include 0's for empty groups as well.
+    # by multiple groups. But only if all values are not identical.
     grp <- if (length(groups) > 1L) head(groups, -1L) else groups
-    df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = grp]
+    df[, nn := length(unique(n)), by = grp]
+    if (!all(df$nn == 1L)) {
+      df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = grp]
+    }
+    df[, nn := NULL]
     fm <- paste0(c(grp, "n"), collapse = "+")
     fm <- paste0(fm, "~", if (length(groups) > 1L) tail(groups, 1L) else "variable")
   } else {

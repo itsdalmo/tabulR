@@ -36,11 +36,11 @@ Usage
 `qtable` always does the following:
 
 -   Returns the count for each variable/group (excluding NA's). Multiple counts are separated with **/**.
--   Only proportions and means are weighted, the counts are always netural.
+-   Only proportions and means are weighted, the counts are always neutral.
 -   It completes the data to make implicit missing values *explicit*.
--   When completing the data, counts are set to `0`, proportions to `0` and means to `NA`.
--   By default, it casts the data to a wide format when deemed appropriate (usually using the last group in `groups`).
--   It also includes a margin (named *Total*) for each column by default.
+-   When completing the data, missing counts, proportions and means are set to `0`, `0` and `NA` respectively.
+-   By default, tables will be cast to a wide format when deemed appropriate (usually using the last group in `groups`).
+-   Includes a margin (called *Total*) for each column by default, if the data is grouped.
 
 ``` r
 require(tabulR)

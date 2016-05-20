@@ -11,7 +11,9 @@ Depends:
     R (>= 3.2)
 Imports:
     data.table (>= 1.9.6),
-    knitr
+    ggplot2 (>= 2.1),
+    knitr,
+    scales
 Suggests:
     dplyr,
     lazyeval,

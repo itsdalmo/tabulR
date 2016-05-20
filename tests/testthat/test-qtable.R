@@ -9,7 +9,7 @@ df <- data.frame(
   stringsAsFactors = FALSE
 )
 
-test_that("qtable and dtable gives same output", {
+test_that("qtable and qtable_ gives same output", {
   skip_if_not_installed("dplyr")
   dt <- df %>% dplyr::group_by(group) %>% qtable(one_of("num"))
   qt <- qtable_(df, vars = "num", groups = "group")

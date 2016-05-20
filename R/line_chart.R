@@ -44,11 +44,13 @@ line_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, w
   UseMethod("line_chart_")
 }
 
-line_chart_.default <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+#' @export
+line_chart_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
   out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
   line_chart_impl(out, vars, groups, weight, margin, wrap)
 }
 
+#' @export
 line_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
   line_chart_impl(df, vars, groups, weight, margin, wrap)
 }

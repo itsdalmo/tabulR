@@ -44,11 +44,13 @@ bar_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wr
   UseMethod("bar_chart_")
 }
 
-bar_chart_.default <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+#' @export
+bar_chart_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
   out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
   bar_chart_impl(out, vars, groups, weight, margin, wrap)
 }
 
+#' @export
 bar_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
   bar_chart_impl(df, vars, groups, weight, margin, wrap)
 }

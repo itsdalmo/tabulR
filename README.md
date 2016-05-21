@@ -63,8 +63,7 @@ df <- data.frame(
 #### Numeric
 
 ``` r
-out <- qtable_(df, vars = "num", groups = c("group", "fct"))
-knitr::knit_print(out, digits = 1L)
+qtable_(df, vars = "num", groups = c("group", "fct"))
 ```
 
 <table>
@@ -178,8 +177,7 @@ NA
 #### Factor
 
 ``` r
-out <- qtable_(df, vars = "fct", groups = "group")
-knitr::knit_print(out, digits = 1L)
+qtable_(df, vars = "fct", groups = "group")
 ```
 
 <table>
@@ -294,7 +292,7 @@ Total
 
 ``` r
 out <- bar_chart_(df, vars = "num", groups = "group")
-# knitr::knit_print(out)
+# out
 ```
 
 NSE
@@ -306,8 +304,7 @@ NSE
 
 ``` r
 require(dplyr)
-out <- df %>% group_by(group) %>% qtable(one_of("num"))
-knitr::knit_print(out, digits = 1L)
+df %>% group_by(group) %>% qtable(one_of("num"))
 ```
 
 <table>
@@ -387,5 +384,5 @@ Total
 ``` r
 require(dplyr)
 out <- df %>% group_by(fct) %>% bar_chart(one_of("num"), margin = FALSE)
-# knitr::knit_print(out)
+# out
 ```

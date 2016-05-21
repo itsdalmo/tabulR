@@ -80,8 +80,7 @@ qtable_.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = 
 #' @importFrom knitr knit_print
 #' @export
 knit_print.qtable <- function(x, format = "html", align = NULL, digits = 1L, ...) {
-  if (data.table::is.data.table(x))
-    x <- as.data.frame(x)
+  x <- as.data.frame(x)
 
   # Default alignment
   def <- rep("l", ncol(x)); def[vapply(x, is.numeric, logical(1L))] <- "c"
@@ -92,5 +91,5 @@ knit_print.qtable <- function(x, format = "html", align = NULL, digits = 1L, ...
     x[is_pct] <- lapply(x[is_pct], function(p) sprintf(fmt = paste0("%.", digits, "f%%"), p*100L))
   }
 
-  knitr::kable(x, format, align = align %||% def, digits, ...)
+  knitr::knit_print(knitr::kable(x, format, align = align %||% def, digits, ...))
 }

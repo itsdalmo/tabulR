@@ -48,6 +48,7 @@ qtable_impl <- function(df, vars, groups, weight, margin, margin_name, wide) {
     data = df, id.vars = c(groups, "wt"), measure.vars = vars,
     variable.factor = TRUE, value.factor = identical(type, "factor")
   )
+  df <- df[!is.na(value), ] # Don't include NA values in count/mean.
 
   if (type == "factor" || type == "character") {
     df <- qtable_freq(df, vars, groups, wide)

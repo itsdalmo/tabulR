@@ -76,19 +76,19 @@ qtable_mean <- function(df, vars, groups, wide) {
   # Return early if not casting
   if (!wide) return(df)
 
-  # Paste together counts for each "grouping" when spreading a numeric
-  # by multiple groups. TODO: Include 0's for empty groups as well.
+  # Create the formula and recount before spreading
   if (length(groups) > 1L || length(groups) && length(vars) > 1L) {
+    by_group <- length(groups) > 1L && !length(vars) > 1L
     # Paste together counts for each "grouping" when spreading a numeric
-    # by multiple groups. But only if all values are not identical.
-    grp <- if (length(groups) > 1L) head(groups, -1L) else groups
-    df[, nn := length(unique(n)), by = grp]
+    # by multiple groups or variables. But only if all values are not identical.
+    n_groups <- if (by_group) head(groups, -1L) else groups
+    df[, nn := length(unique(n)), by = n_groups]
     if (!all(df$nn == 1L)) {
-      df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = grp]
+      df[, n := as.character(n)][, n := paste0(n, collapse = "/"), by = n_groups]
     }
     df[, nn := NULL]
-    fm <- paste0(c(grp, "n"), collapse = "+")
-    fm <- paste0(fm, "~", if (length(groups) > 1L) tail(groups, 1L) else "variable")
+    fm <- paste0(c(n_groups, "n"), collapse = "+")
+    fm <- paste0(fm, "~", if (by_group) tail(groups, 1L) else "variable")
   } else {
     fm <- paste0(c(groups, "n"), collapse = "+")
     fm <- paste0(fm, "~ variable", collapse = " ")

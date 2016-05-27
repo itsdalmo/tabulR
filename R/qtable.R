@@ -21,7 +21,6 @@ qtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wide = 
 
   # Use dplyr to select vars. Also, look for dplyr groups if not specified.
   vars <- dplyr::select_vars_(names(df), lazyeval::lazy_dots(...))
-  groups <- groups %||% as.character(dplyr::groups(df))
 
   # Rename vars before creating table
   if (any(names(vars) != vars)) {
@@ -65,6 +64,11 @@ qtable_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margi
 
 #' @export
 qtable_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
+  if (is.null(groups) && requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- dplyr::groups(df)
+    if (!is.null(groups))
+      groups <- as.character(groups)
+  }
   df <- data.table::as.data.table(df)
   df <- as.data.frame(qtable_impl(df, vars, groups, weight, margin, margin_name, wide))
   structure(df, class = c("qtable", class(df)))
@@ -72,6 +76,11 @@ qtable_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = 
 
 #' @export
 qtable_.data.table <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
+  if (is.null(groups) && requireNamespace("dplyr", quietly = TRUE)) {
+    groups <- dplyr::groups(df)
+    if (!is.null(groups))
+      groups <- as.character(groups)
+  }
   df <- data.table::copy(df)
   df <- qtable_impl(df, vars, groups, weight, margin, margin_name, wide)
   structure(df, class = c("qtable", class(df)))

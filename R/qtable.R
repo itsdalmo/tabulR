@@ -15,7 +15,7 @@
 #' @examples
 #' # TODO
 
-qtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wide = TRUE) {
+qtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wide = TRUE) {
   if (!requireNamespace("dplyr", quietly = TRUE))
     stop("The NSE version of qtable requires dplyr.")
 
@@ -31,7 +31,7 @@ qtable <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wide = 
     }
   }
 
-  qtable_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, wide = wide)
+  qtable_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, margin_name = margin_name, wide = wide)
 
 }
 

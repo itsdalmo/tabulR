@@ -5,7 +5,7 @@
 \title{qtable}
 \usage{
 qtable(df, ..., groups = NULL, weight = NULL, margin = TRUE,
-  wide = TRUE)
+  margin_name = NULL, wide = TRUE)
 }
 \arguments{
 \item{df}{A \code{data.frame} or \code{data.table}.}
@@ -17,6 +17,8 @@ qtable(df, ..., groups = NULL, weight = NULL, margin = TRUE,
 \item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
 
 \item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
+
+\item{margin_name}{Optional: Give the margin a different name from "Total".}
 
 \item{wide}{Should a long or a wide table be returned? Wide tables spread levels for
 \code{factor} and unique values for \code{character}. For a single \code{numeric},

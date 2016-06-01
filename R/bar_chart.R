@@ -14,7 +14,7 @@
 #' @examples
 #' NULL
 
-bar_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+bar_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
   if (!requireNamespace("dplyr", quietly = TRUE))
     stop("The NSE version of bar_chart requires dplyr.")
 
@@ -32,30 +32,30 @@ bar_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap
     }
   }
 
-  bar_chart_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, wrap = wrap)
+  bar_chart_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, margin_name = margin_name, wrap = wrap)
 
 }
 
 #' @rdname bar_chart
 #' @export
-bar_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+bar_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
   if (length(groups) > 1L)
     stop("bar_chart can only handle 1 grouping variable.")
   UseMethod("bar_chart_")
 }
 
 #' @export
-bar_chart_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
-  bar_chart_impl(out, vars, groups, weight, margin, wrap)
+bar_chart_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
+  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, margin_name = margin_name, wide = FALSE)
+  bar_chart_impl(out, vars, groups, weight, margin, margin_name, wrap)
 }
 
 #' @export
-bar_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  bar_chart_impl(df, vars, groups, weight, margin, wrap)
+bar_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
+  bar_chart_impl(df, vars, groups, weight, margin, margin_name, wrap)
 }
 
-bar_chart_impl <- function(df, vars, groups, weight, margin, wrap) {
+bar_chart_impl <- function(df, vars, groups, weight, margin, margin_name, wrap) {
   is_grouped <- !is.null(groups)
   is_proportion <- "proportion" %in% names(df)
   multiple_vars <- length(vars) > 1L

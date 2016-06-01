@@ -14,7 +14,7 @@
 #' @examples
 #' NULL
 
-line_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+line_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
   if (!requireNamespace("dplyr", quietly = TRUE))
     stop("The NSE version of bar_chart requires dplyr.")
 
@@ -32,30 +32,30 @@ line_chart <- function(df, ..., groups = NULL, weight = NULL, margin = TRUE, wra
     }
   }
 
-  line_chart_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, wrap = wrap)
+  line_chart_(df, vars = names(vars), groups = groups, weight = weight, margin = margin, margin_name = margin_name, wrap = wrap)
 
 }
 
 #' @rdname line_chart
 #' @export
-line_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
+line_chart_ <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
   if (length(groups) > 1L)
     stop("line_chart can only handle 1 grouping variable.")
   UseMethod("line_chart_")
 }
 
 #' @export
-line_chart_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, wide = FALSE)
-  line_chart_impl(out, vars, groups, weight, margin, wrap)
+line_chart_.data.frame <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
+  out <- tabulR::qtable_(df, vars = vars, groups = groups, weight = weight, margin = margin, margin_name = margin_name, wide = FALSE)
+  line_chart_impl(out, vars, groups, weight, margin, margin_name, wrap)
 }
 
 #' @export
-line_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap = FALSE) {
-  line_chart_impl(df, vars, groups, weight, margin, wrap)
+line_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, margin_name = NULL, wrap = FALSE) {
+  line_chart_impl(df, vars, groups, weight, margin, margin_name, wrap)
 }
 
-line_chart_impl <- function(df, vars, groups = NULL, weight = NULL, margin = TRUE, wrap) {
+line_chart_impl <- function(df, vars, groups, weight, margin, margin_name, wrap) {
   if ("proportion" %in% names(df)) stop("Use bar_chart() to plot proportions.")
 
   # Create the plot

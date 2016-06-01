@@ -6,10 +6,10 @@
 \title{Bar chart}
 \usage{
 bar_chart(df, ..., groups = NULL, weight = NULL, margin = TRUE,
-  wrap = FALSE)
+  margin_name = NULL, wrap = FALSE)
 
 bar_chart_(df, vars, groups = NULL, weight = NULL, margin = TRUE,
-  wrap = FALSE)
+  margin_name = NULL, wrap = FALSE)
 }
 \arguments{
 \item{df}{A \code{data.frame} or \code{data.table}.}
@@ -21,6 +21,8 @@ bar_chart_(df, vars, groups = NULL, weight = NULL, margin = TRUE,
 \item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
 
 \item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
+
+\item{margin_name}{Optional: Give the margin a different name from "Total".}
 
 \item{wrap}{Optional: Call \code{\link[ggplot2]{facet_wrap}} on variables in \code{bar_chart}.}
 

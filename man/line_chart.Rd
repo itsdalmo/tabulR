@@ -6,10 +6,10 @@
 \title{Line chart}
 \usage{
 line_chart(df, ..., groups = NULL, weight = NULL, margin = TRUE,
-  wrap = FALSE)
+  margin_name = NULL, wrap = FALSE)
 
 line_chart_(df, vars, groups = NULL, weight = NULL, margin = TRUE,
-  wrap = FALSE)
+  margin_name = NULL, wrap = FALSE)
 }
 \arguments{
 \item{df}{A \code{data.frame} or \code{data.table}.}
@@ -21,6 +21,8 @@ line_chart_(df, vars, groups = NULL, weight = NULL, margin = TRUE,
 \item{weight}{Name of a variable to weight by. Only used when \code{margin = TRUE}.}
 
 \item{margin}{If \code{TRUE} (the default), the first group will include a "Total".}
+
+\item{margin_name}{Optional: Give the margin a different name from "Total".}
 
 \item{wrap}{Ignored.}
 

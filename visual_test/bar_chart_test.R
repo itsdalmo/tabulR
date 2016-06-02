@@ -122,7 +122,7 @@ df %>% group_by(group) %>% bar_chart(fct, fct2)
 # x: group (Group A to D)
 # legend: value (Yes/No/Don't know)
 # fill: value (Yes/No/Don't know)
-# wrap: variable (fct1, fct2)
+# wrap: dum (Answer A, Answer B)
 
 df %>% group_by(group, dum) %>% bar_chart(fct)
 

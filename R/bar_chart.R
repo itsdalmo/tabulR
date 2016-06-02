@@ -56,90 +56,102 @@ bar_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = T
 }
 
 bar_chart_impl <- function(df, vars, groups, weight, margin, margin_name, wrap) {
-  is_grouped <- !is.null(groups)
   is_proportion <- "proportion" %in% names(df)
+  grouped <- !is.null(groups)
 
-  mult_var <- length(vars) > 1L
-  mult_grp <- length(groups) > 1L
+  # Decide on aesthetics based on type and number of variables, and groups
+  xaxis <- if (is_proportion) "value" else "variable"     # value == factor levels
+  yaxis <- if (is_proportion) "proportion" else "value"   # proportion/numeric value
+  group <- if (grouped) tail(groups, 1L) else NULL        # group/fill.
+  if (is_proportion) group <- head(groups, 1L)            # Special for proportions.
+  wrapv <- if (wrap) "variable" else NULL                 # Wrap variable by default.
 
-  # Give informative warnings when input cannot be plotted. Differs between
+  # Give informative warnings when input cannot be visualized. Differs between
   # proportions and numerics, since proportions also need to indicate "value".
-  if (is_proportion && mult_grp && mult_var) {
+  if (is_proportion && length(groups) > 1L && length(vars) > 1L) {
     stop("Cannot plot multiple proportions with multiple groups.", call. = FALSE)
-  } else if (is_proportion && mult_var && is_grouped && !wrap) {
+  } else if (is_proportion && length(vars) > 1L && length(group) && !wrap) {
     warning("Plotting multiple proportions with groups requires wrapping. Ignoring wrap = FALSE.", call. = FALSE)
     wrap <- TRUE
-  } else if (is_proportion && mult_grp && !wrap) {
+  } else if (is_proportion && length(groups) > 1L && !wrap) {
     warning("Plotting a proportion with multiple groups requires wrapping. Ignoring wrap = FALSE.", call. = FALSE)
     wrap <- TRUE
-  } else if (!is_proportion && mult_var && mult_grp && !wrap) {
+  } else if (!is_proportion && length(vars) > 1L && length(groups) > 1L && !wrap) {
     warning("Ignoring wrap = FALSE when plotting multiple variables and groups.", call. = FALSE)
     wrap <- TRUE
   }
+
   # Always set wrap to FALSE when dealing with a single variable and <= 1 group.
-  if (!mult_var && !mult_grp && wrap) {
+  if (!length(vars) > 1L && !length(groups) > 1L && wrap) {
     warning("Ignoring wrap = TRUE when plotting a single variable and <= 1 group.", call. = FALSE)
     wrap <- FALSE
   }
 
-  # Use groups as the x-axis if it contains more unique values than the
-  # proportions being plotted, or the number of variables being plotted for numeric plots.
-  var <- if (is_proportion) "value" else "variable"
-  if (is_grouped) {
-    gvar <- df[[head(groups, 1L)]]
-    glength <- length(levels(gvar) %||% unique(gvar))
-    xvar <- df[[var]]
-    xlength <- length(levels(xvar) %||% unique(xvar))
-    if (glength > xlength) {
-      org <- var; var <- head(groups, 1L);
-      groups <- c(org, tail(groups, -1L))
+  # Use groups as the x-axis if it contains more unique values than the proportions
+  # being plotted, or the number of variables being plotted for numeric plots.
+  if (grouped) {
+    n_group <- df[[group]]
+    n_group <- length(levels(n_group) %||% unique(n_group))
+    n_xaxis <- df[[xaxis]]
+    n_xaxis <- length(levels(n_xaxis) %||% unique(n_xaxis))
+    if (n_group > n_xaxis) {
+      # Make xaxis the primary group (variables/values) and place group on xaxis instead.
+      group <- if (is_proportion || length(vars) > 1L) xaxis else group
+      xaxis <- head(groups, 1L)
+    }
+  } else if (is_proportion && length(vars) > 1L) {
+    # Group by variable if we have multiple proportions and no groups
+    group <- "variable"
+  }
+
+
+  # Wrap will always be FALSE if there is not multiple groups or variables.
+  # If there are not multiple variables, we want to wrap by the second group.
+  if (wrap) {
+    if (length(vars) > 1L) {
+      wrapv <- "variable"
+      group <- if (is_proportion) "value" else tail(groups, 1L)
+    } else {
+      wrapv <- tail(groups, 1L)
+      if (is_proportion) group <- "value"
     }
   }
 
-  # Figure out the best aesthetics for visualizing the plot.
-  # (Depends on: proportion/numeric, grouped or not, single/mult. vars, wrap etc.)
-  if (is_proportion) {
-    xvar  <- var
-    yvar  <- "proportion"
-    ymin  <- 0L
-    ymax  <- 1.05
-    group <- if (is_grouped) head(groups, 1L) else if (!is_grouped && mult_var && !wrap) "variable" else NULL
-    fill  <- if (is_grouped) head(groups, 1L) else if (!is_grouped && mult_var && !wrap) "variable" else NULL
-  } else {
-    xvar  <- var
-    yvar  <- "value"
-    ymin  <- min(df$value, na.rm = TRUE) * 0.75
-    ymax  <- max(df$value, na.rm = TRUE) * 1.2
-    group <- if ((mult_var || mult_grp) && is_grouped && (!wrap || mult_var && mult_grp)) tail(groups, 1L) else NULL
-    fill  <- if ((mult_var || mult_grp) && is_grouped && (!wrap || mult_var && mult_grp)) tail(groups, 1L) else NULL
-  }
+  # Make sure we are not grouping by the the same variable as we have on the
+  # xaxis, or that we are wrapping by.
+  group <- setdiff(group, c(xaxis, wrapv))
+  if (!length(group)) group <- NULL
 
-  # Create the bar plot using predefined aes
+  # Determine yaxis limits for proportions/scores
+  ymin <- if (is_proportion) 0L else min(df$value, na.rm = TRUE) * 0.75
+  ymax <- if (is_proportion) 1.05 else max(df$value, na.rm = TRUE) * 1.2
+
+  # Create the plot and add geom_bar -------------------------------------------
   out <- ggplot2::ggplot(
     data = df, ggplot2::aes_string(
-      x = xvar,
-      y = yvar,
+      x = xaxis,
+      y = yaxis,
       ymin = ymin,
       ymax = ymax,
       group = group,
-      fill  = fill)) +
+      fill  = group)) +
 
     ggplot2::geom_bar(
       stat = "identity",
       width = .5,
       position = ggplot2::position_dodge(width = .6))
 
-  # Add labels to each bar.
-  # Round percentages to a whole number, keep 1 decimal for numeric.
+  # Add labels -----------------------------------------------------------------
+  # (Round percentages to a whole number, keep 1 decimal for numeric)
   out <- out + ggplot2::geom_text(
     ggplot2::aes(
       label = if (is_proportion) sprintf("%.0f %%", proportion * 100L) else sprintf("%.1f", value)),
-    position = ggplot2::position_dodge(width = 0.6),
-    vjust = -1.1,
-    hjust = .35,
-    size = 3,
-    colour = "#23373b"
-  )
+      position = ggplot2::position_dodge(width = 0.6),
+      vjust = -1.1,
+      hjust = .35,
+      size = 3,
+      colour = "#23373b"
+    )
 
   # For proportions, we want yaxis ticks to be percentages as well.
   # In case of numeric, we only want to show a subset of the plot area.
@@ -149,14 +161,9 @@ bar_chart_impl <- function(df, vars, groups, weight, margin, margin_name, wrap) 
     out <- out + ggplot2::coord_cartesian(ylim=c(ymin, ymax))
   }
 
-  # Optionally wrap the results by variable.
+  # When wrapping, use the last group or xaxis
   if (wrap) {
-    if (is_proportion) {
-      wby <- if (mult_var) "variable" else tail(groups, 1L)
-    } else {
-      wby <- if (mult_var) "variable" else tail(groups, 1L)
-    }
-    out <- out + ggplot2::facet_wrap(wby, ncol = 2L, scales="free_x")
+    out <- out + ggplot2::facet_wrap(wrapv, ncol = 2L, scales = "free_x")
   }
 
   out

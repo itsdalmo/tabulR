@@ -53,9 +53,11 @@ Usage
 require(tabulR)
 set.seed(100L)
 df <- data.frame(
-  group = factor(paste("Group", LETTERS[1:3]), levels = paste("Group", LETTERS[1:4])),
-  fct = factor(c("No", "Yes", NA), levels = c("Yes", "No", "Don't know")),
-  num = runif(3, 0, 100),
+  group = factor(rbinom(100, 4, .2), labels = paste("Group", LETTERS[1:4])),
+  fct = factor(rbinom(100, 2, .3), labels = c("Yes", "No", "Don't know")),
+  dum = factor(rbinom(100, 1, .5), labels = c("Answer A", "Answer B")),
+  num1 = runif(100, 0, 100),
+  num2 = runif(100, 0, 100),
   stringsAsFactors = FALSE
 )
 ```
@@ -63,7 +65,7 @@ df <- data.frame(
 #### Numeric
 
 ``` r
-qtable_(df, vars = "num", groups = c("group", "fct"))
+qtable_(df, vars = "num1", groups = c("group", "fct"))
 ```
 
 <table>
@@ -92,16 +94,16 @@ Don't know
 Group A
 </td>
 <td style="text-align:left;">
-0/1/0
+22/14/2
 </td>
 <td style="text-align:center;">
-NA
+65.0
 </td>
 <td style="text-align:center;">
-30.8
+51.5
 </td>
 <td style="text-align:center;">
-NA
+38.8
 </td>
 </tr>
 <tr>
@@ -109,16 +111,16 @@ NA
 Group B
 </td>
 <td style="text-align:left;">
-1/0/0
+21/19/5
 </td>
 <td style="text-align:center;">
-25.8
+46.9
 </td>
 <td style="text-align:center;">
-NA
+47.5
 </td>
 <td style="text-align:center;">
-NA
+54.7
 </td>
 </tr>
 <tr>
@@ -126,16 +128,16 @@ NA
 Group C
 </td>
 <td style="text-align:left;">
-0/0/0
+5/6/4
 </td>
 <td style="text-align:center;">
-NA
+55.2
 </td>
 <td style="text-align:center;">
-NA
+46.1
 </td>
 <td style="text-align:center;">
-NA
+34.7
 </td>
 </tr>
 <tr>
@@ -143,13 +145,13 @@ NA
 Group D
 </td>
 <td style="text-align:left;">
-0/0/0
+1/1/0
 </td>
 <td style="text-align:center;">
-NA
+80.1
 </td>
 <td style="text-align:center;">
-NA
+19.7
 </td>
 <td style="text-align:center;">
 NA
@@ -160,16 +162,16 @@ NA
 Total
 </td>
 <td style="text-align:left;">
-1/1/0
+49/40/11
 </td>
 <td style="text-align:center;">
-25.8
+56.6
 </td>
 <td style="text-align:center;">
-30.8
+48.0
 </td>
 <td style="text-align:center;">
-NA
+44.5
 </td>
 </tr>
 </tbody>
@@ -206,16 +208,16 @@ Don't know
 Group A
 </td>
 <td style="text-align:center;">
-1
+38
 </td>
 <td style="text-align:center;">
-0.0%
+57.9%
 </td>
 <td style="text-align:center;">
-100.0%
+36.8%
 </td>
 <td style="text-align:center;">
-0.0%
+5.3%
 </td>
 </tr>
 <tr>
@@ -223,16 +225,16 @@ Group A
 Group B
 </td>
 <td style="text-align:center;">
-1
+45
 </td>
 <td style="text-align:center;">
-100.0%
+46.7%
 </td>
 <td style="text-align:center;">
-0.0%
+42.2%
 </td>
 <td style="text-align:center;">
-0.0%
+11.1%
 </td>
 </tr>
 <tr>
@@ -240,38 +242,21 @@ Group B
 Group C
 </td>
 <td style="text-align:center;">
-0
+15
 </td>
 <td style="text-align:center;">
-0.0%
+33.3%
 </td>
 <td style="text-align:center;">
-0.0%
+40.0%
 </td>
 <td style="text-align:center;">
-0.0%
+26.7%
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 Group D
-</td>
-<td style="text-align:center;">
-0
-</td>
-<td style="text-align:center;">
-0.0%
-</td>
-<td style="text-align:center;">
-0.0%
-</td>
-<td style="text-align:center;">
-0.0%
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Total
 </td>
 <td style="text-align:center;">
 2
@@ -286,13 +271,29 @@ Total
 0.0%
 </td>
 </tr>
+<tr>
+<td style="text-align:left;">
+Total
+</td>
+<td style="text-align:center;">
+100
+</td>
+<td style="text-align:center;">
+49.0%
+</td>
+<td style="text-align:center;">
+40.0%
+</td>
+<td style="text-align:center;">
+11.0%
+</td>
+</tr>
 </tbody>
 </table>
 #### Chart
 
 ``` r
-out <- bar_chart_(df, vars = "num", groups = "group")
-# out
+out <- bar_chart_(df, vars = "num1", groups = "group")
 ```
 
 NSE
@@ -304,7 +305,7 @@ NSE
 
 ``` r
 require(dplyr)
-df %>% group_by(group) %>% qtable(one_of("num"))
+df %>% group_by(group) %>% qtable(starts_with("num"))
 ```
 
 <table>
@@ -317,7 +318,10 @@ group
 n
 </th>
 <th style="text-align:center;">
-num
+num1
+</th>
+<th style="text-align:center;">
+num2
 </th>
 </tr>
 </thead>
@@ -327,10 +331,13 @@ num
 Group A
 </td>
 <td style="text-align:center;">
-1
+38
 </td>
 <td style="text-align:center;">
-30.8
+58.6
+</td>
+<td style="text-align:center;">
+51.8
 </td>
 </tr>
 <tr>
@@ -338,10 +345,13 @@ Group A
 Group B
 </td>
 <td style="text-align:center;">
-1
+45
 </td>
 <td style="text-align:center;">
-25.8
+48.0
+</td>
+<td style="text-align:center;">
+50.1
 </td>
 </tr>
 <tr>
@@ -349,10 +359,13 @@ Group B
 Group C
 </td>
 <td style="text-align:center;">
-1
+15
 </td>
 <td style="text-align:center;">
-55.2
+46.1
+</td>
+<td style="text-align:center;">
+57.6
 </td>
 </tr>
 <tr>
@@ -360,10 +373,13 @@ Group C
 Group D
 </td>
 <td style="text-align:center;">
-0
+2
 </td>
 <td style="text-align:center;">
-NA
+49.9
+</td>
+<td style="text-align:center;">
+24.1
 </td>
 </tr>
 <tr>
@@ -371,10 +387,13 @@ NA
 Total
 </td>
 <td style="text-align:center;">
-3
+100
 </td>
 <td style="text-align:center;">
-37.3
+51.8
+</td>
+<td style="text-align:center;">
+51.4
 </td>
 </tr>
 </tbody>
@@ -383,6 +402,5 @@ Total
 
 ``` r
 require(dplyr)
-out <- df %>% group_by(fct) %>% bar_chart(one_of("num"), margin = FALSE)
-# out
+out <- df %>% group_by(group) %>% bar_chart(starts_with("num"), margin = FALSE)
 ```

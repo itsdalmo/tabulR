@@ -85,8 +85,8 @@ qtable_(df, vars = "fct", groups = "group")
 
 #### Chart
 
-```{r, warning = FALSE}
-out <- bar_chart_(df, vars = "num1", groups = "group")
+```{r ex1, warning = FALSE}
+bar_chart_(df, vars = "num1", groups = "group")
 ```
 
 ## NSE
@@ -102,7 +102,6 @@ df %>% group_by(group) %>% qtable(starts_with("num"))
 
 #### Chart
 
-```{r, message = FALSE, warning = FALSE}
-require(dplyr)
-out <- df %>% group_by(group) %>% bar_chart(starts_with("num"), margin = FALSE)
+```{r ex2, message = FALSE, warning = FALSE}
+df %>% group_by(group) %>% bar_chart(starts_with("num"), margin = FALSE)
 ```

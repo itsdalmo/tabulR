@@ -293,8 +293,10 @@ Total
 #### Chart
 
 ``` r
-out <- bar_chart_(df, vars = "num1", groups = "group")
+bar_chart_(df, vars = "num1", groups = "group")
 ```
+
+![](README-ex1-1.png)
 
 NSE
 ---
@@ -401,6 +403,7 @@ Total
 #### Chart
 
 ``` r
-require(dplyr)
-out <- df %>% group_by(group) %>% bar_chart(starts_with("num"), margin = FALSE)
+df %>% group_by(group) %>% bar_chart(starts_with("num"), margin = FALSE)
 ```
+
+![](README-ex2-1.png)

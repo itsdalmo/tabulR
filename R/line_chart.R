@@ -58,7 +58,7 @@ line_chart_.qtable <- function(df, vars, groups = NULL, weight = NULL, margin = 
 line_chart_impl <- function(df, vars, groups, weight, margin, margin_name, wrap) {
   if ("proportion" %in% names(df)) stop("Use bar_chart() to plot proportions.")
 
-  mult_var <- length(vars) > 1L
+  mult_var <- length(levels(df$variable)) > 1L
   mult_grp <- length(groups) > 1L
 
   if (!mult_var && !mult_grp) {

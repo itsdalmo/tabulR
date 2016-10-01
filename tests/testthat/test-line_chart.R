@@ -19,7 +19,7 @@ test_that("line_chart visual tests work", {
 
 test_that("line_chart and line_chart_ gives same output", {
   skip_if_not_installed("dplyr")
-  dt <- df %>% dplyr::group_by(group) %>% line_chart(one_of("num1", "num2"))
+  dt <- df %>% dplyr::group_by(group) %>% line_chart(dplyr::one_of("num1", "num2"))
   qt <- line_chart_(df, vars = c("num1", "num2"), groups = "group")
   expect_equal(dt, qt)
 })

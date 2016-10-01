@@ -11,7 +11,7 @@ df <- data.frame(
 
 test_that("qtable and qtable_ gives same output", {
   skip_if_not_installed("dplyr")
-  dt <- df %>% dplyr::group_by(group) %>% qtable(one_of("num"))
+  dt <- df %>% dplyr::group_by(group) %>% qtable(dplyr::one_of("num"))
   qt <- qtable_(df, vars = "num", groups = "group")
   expect_identical(dt, qt)
 })

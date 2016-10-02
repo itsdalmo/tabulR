@@ -37,7 +37,7 @@ test_that("bar_chart visual tests for proportions work", {
 
 test_that("bar_chart and bar_chart_ gives same output", {
   skip_if_not_installed("dplyr")
-  dt <- df %>% dplyr::group_by(group) %>% bar_chart(one_of("num1"))
+  dt <- df %>% dplyr::group_by(group) %>% bar_chart(dplyr::one_of("num1"))
   qt <- bar_chart_(df, vars = "num1", groups = "group")
   expect_equal(dt, qt)
 })
